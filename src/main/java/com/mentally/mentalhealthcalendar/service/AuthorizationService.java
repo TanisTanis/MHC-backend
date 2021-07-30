@@ -31,7 +31,8 @@ public class AuthorizationService implements UserDetailsService {
     public String signUpUser(AppUser newUser) {
         boolean userExists = appUserRepo.findUserByEmail(newUser.getEmail()).isPresent();
         if (userExists) {
-            return String.format("User With Email %s Already Exists", newUser.getEmail());
+            throw new IllegalStateException(String.format("User with email %s already exists. Please log in instead.", newUser.getEmail()));
+//            return String.format("User With Email %s Already Exists", newUser.getEmail());
         }
 
         //TODO check if user exists but hasnt confirmed email, if so send another email
