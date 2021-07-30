@@ -3,15 +3,24 @@ package com.mentally.mentalhealthcalendar.service;
 import com.mentally.mentalhealthcalendar.exceptions.UserNotFoundException;
 import com.mentally.mentalhealthcalendar.model.AppUser;
 import com.mentally.mentalhealthcalendar.repo.UserRepo;
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
 
 @Service
-public class AppUserService {
+public class AppUserService implements UserDetailsService {
     private final UserRepo userRepo;
+
+    @Override
+    public UserDetails loadUserByUsername(String s) throws UsernameNotFoundException {
+        return null;
+    }
 
     @Autowired
     public AppUserService(UserRepo userRepo) {

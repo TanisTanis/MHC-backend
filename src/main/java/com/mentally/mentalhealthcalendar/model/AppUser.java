@@ -1,8 +1,19 @@
 package com.mentally.mentalhealthcalendar.model;
 
-import javax.persistence.*;
-import java.io.Serializable;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
+import javax.persistence.*;
+import java.util.Collection;
+import java.util.Collections;
+
+@Getter
+@Setter
+@NoArgsConstructor
 @Entity
 @Table(
         name = "app_user",
@@ -10,7 +21,7 @@ import java.io.Serializable;
                 @UniqueConstraint(name="user_email_unique", columnNames = "email")
         }
 )
-public class AppUser implements Serializable {
+public class AppUser implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -39,18 +50,30 @@ public class AppUser implements Serializable {
     private String email;
 
     @Column(
+            name="password",
+            nullable = false,
+            columnDefinition = "TEXT"
+    )
+    private String password;
+
+    @Column(
             name = "phone",
             columnDefinition = "TEXT"
     )
     private String phone;
 
-    public AppUser() {}
+    @Enumerated(EnumType.STRING)
+    private AppUserRole appUserRole;
+    private Boolean locked = false;
+    private Boolean enabled = false;
 
-    public AppUser(String firstName, String lastName, String email, String phone) {
+    public AppUser(String firstName, String lastName, String email, String password, String phone, AppUserRole appUserRole) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
+        this.password = password;
         this.phone = phone;
+        this.appUserRole = appUserRole;
     }
 
     public Long getId() {
@@ -93,6 +116,8 @@ public class AppUser implements Serializable {
         this.phone = phone;
     }
 
+    public AppUserRole getAppUserRole() { return appUserRole; }
+
     @Override
     public String toString() {
         return "AppUser{" +
@@ -102,5 +127,45 @@ public class AppUser implements Serializable {
                 ", email='" + email + '\'' +
                 ", phone='" + phone + '\'' +
                 '}';
+    }
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        SimpleGrantedAuthority authority = new SimpleGrantedAuthority(appUserRole.name());
+        return Collections.singletonList(authority);
+    }
+
+    @Override
+    public String getPassword() {
+        return password;
+    }
+
+    @Override
+    public String getUsername() {
+        return null;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return !locked;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return enabled;
     }
 }
