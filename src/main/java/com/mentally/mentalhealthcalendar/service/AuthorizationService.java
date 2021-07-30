@@ -1,6 +1,8 @@
 package com.mentally.mentalhealthcalendar.service;
 
 import com.mentally.mentalhealthcalendar.model.AppUser;
+import com.mentally.mentalhealthcalendar.registration.token.ConfirmationToken;
+import com.mentally.mentalhealthcalendar.registration.token.ConfirmationTokenService;
 import com.mentally.mentalhealthcalendar.repo.UserRepo;
 import lombok.AllArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -9,12 +11,16 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+import java.util.UUID;
+
 @Service
 @AllArgsConstructor
 public class AuthorizationService implements UserDetailsService {
     private final UserRepo appUserRepo;
     private final static String USER_NOT_FOUND = "User with email %s not found";
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
+    private final ConfirmationTokenService confirmationTokenService;
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
@@ -32,6 +38,21 @@ public class AuthorizationService implements UserDetailsService {
         newUser.setPassword(encodedPassword);
 
         appUserRepo.save(newUser);
-        return encodedPassword;
+
+        String token = UUID.randomUUID().toString();
+        ConfirmationToken confirmationToken = new ConfirmationToken(
+                token,
+                LocalDateTime.now(),
+                LocalDateTime.now().plusMinutes(15),
+                newUser
+        );
+
+        confirmationTokenService.saveConfirmationToken(confirmationToken);
+        return token;
     }
+
+    public int enableAppUser(String email) {
+        return appUserRepo.enableAppUser(email);
+    }
+
 }

@@ -3,7 +3,6 @@ package com.mentally.mentalhealthcalendar.service;
 import com.mentally.mentalhealthcalendar.exceptions.UserNotFoundException;
 import com.mentally.mentalhealthcalendar.model.AppUser;
 import com.mentally.mentalhealthcalendar.repo.UserRepo;
-import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
