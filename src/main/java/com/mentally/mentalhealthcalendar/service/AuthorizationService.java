@@ -34,6 +34,8 @@ public class AuthorizationService implements UserDetailsService {
             return String.format("User With Email %s Already Exists", newUser.getEmail());
         }
 
+        //TODO check if user exists but hasnt confirmed email, if so send another email
+
         String encodedPassword = bCryptPasswordEncoder.encode(newUser.getPassword());
         newUser.setPassword(encodedPassword);
 
