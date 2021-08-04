@@ -5,8 +5,10 @@ import com.mentally.mentalhealthcalendar.model.AppUser;
 import com.mentally.mentalhealthcalendar.model.AppUserRole;
 import com.mentally.mentalhealthcalendar.registration.token.ConfirmationToken;
 import com.mentally.mentalhealthcalendar.registration.token.ConfirmationTokenService;
+import com.mentally.mentalhealthcalendar.service.AppUserService;
 import com.mentally.mentalhealthcalendar.service.AuthorizationService;
 import lombok.AllArgsConstructor;
+import org.apache.coyote.Response;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -20,8 +22,9 @@ public class RegistrationService {
     private final EmailValidator emailValidator;
     private final ConfirmationTokenService confirmationTokenService;
     private final EmailSender emailSender;
+    private final AppUserService appUserService;
 
-    public String register(RegistrationRequest newUser) {
+    public ResponseUser register(RegistrationRequest newUser) {
         boolean validEmail = emailValidator.test(newUser.getEmail());
 
         if (!validEmail) {
@@ -39,7 +42,9 @@ public class RegistrationService {
         );
         String confirmationLink = "http://localhost:8080/api/auth/signup/confirm?token=" + token;
         emailSender.send(newUser.getEmail(), buildEmail(newUser.getFirstName(), confirmationLink));
-        return token;
+        AppUser addedUser = appUserService.findUserByEmail(newUser.getEmail()).orElseThrow(() -> new IllegalStateException("Account not found"));
+        return new ResponseUser(addedUser.getId(), addedUser.getEmail(), token);
+
     }
 
     @Transactional
