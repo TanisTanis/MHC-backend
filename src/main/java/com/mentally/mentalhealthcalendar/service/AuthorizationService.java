@@ -3,7 +3,6 @@ package com.mentally.mentalhealthcalendar.service;
 import com.mentally.mentalhealthcalendar.email.EmailBuilder;
 import com.mentally.mentalhealthcalendar.email.EmailService;
 import com.mentally.mentalhealthcalendar.model.AppUser;
-import com.mentally.mentalhealthcalendar.registration.RegistrationService;
 import com.mentally.mentalhealthcalendar.registration.token.ConfirmationToken;
 import com.mentally.mentalhealthcalendar.registration.token.ConfirmationTokenService;
 import com.mentally.mentalhealthcalendar.repo.UserRepo;
@@ -76,5 +75,4 @@ public class AuthorizationService implements UserDetailsService {
     public int enableAppUser(String email) {
         return appUserRepo.enableAppUser(email);
     }
-
 }

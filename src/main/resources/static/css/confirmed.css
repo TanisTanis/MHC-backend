@@ -1,0 +1,29 @@
+h1 {
+  color: white;
+  font-weight: bold;
+  font-size: 45px;
+  text-align: center;
+}
+
+.main_confirm_div {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  min-height: 100vh;
+}
+
+a {
+  color: greenyellow;
+  font-weight: bold;
+  font-size: 48px;
+}
+
+html {
+  background: url(../images/forest.jpeg) no-repeat center center fixed;
+  -webkit-background-size: cover;
+  -moz-background-size: cover;
+  -o-background-size: cover;
+  background-size: cover;
+}

@@ -5,9 +5,10 @@ import lombok.AllArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
-@RestController
+@Controller
 @RequestMapping(path="api/auth/signup")
 @AllArgsConstructor
 public class RegistrationController {
@@ -22,6 +23,7 @@ public class RegistrationController {
 
     @GetMapping(path = "/confirm")
     public String confirmToken(@RequestParam("token") String token) {
-        return registrationService.confirmToken(token);
+        registrationService.confirmToken(token);
+        return "confirmed";
     }
 }
