@@ -1,6 +1,9 @@
 package com.mentally.mentalhealthcalendar.service;
 
+import com.mentally.mentalhealthcalendar.email.EmailBuilder;
+import com.mentally.mentalhealthcalendar.email.EmailService;
 import com.mentally.mentalhealthcalendar.model.AppUser;
+import com.mentally.mentalhealthcalendar.registration.RegistrationService;
 import com.mentally.mentalhealthcalendar.registration.token.ConfirmationToken;
 import com.mentally.mentalhealthcalendar.registration.token.ConfirmationTokenService;
 import com.mentally.mentalhealthcalendar.repo.UserRepo;
@@ -21,6 +24,8 @@ public class AuthorizationService implements UserDetailsService {
     private final static String USER_NOT_FOUND = "User with email %s not found";
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
     private final ConfirmationTokenService confirmationTokenService;
+    private final EmailService emailService;
+    private final EmailBuilder emailBuilder;
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
@@ -31,11 +36,25 @@ public class AuthorizationService implements UserDetailsService {
     public String signUpUser(AppUser newUser) {
         boolean userExists = appUserRepo.findUserByEmail(newUser.getEmail()).isPresent();
         if (userExists) {
-            throw new IllegalStateException(String.format("User with email %s already exists. Please log in instead.", newUser.getEmail()));
-//            return String.format("User With Email %s Already Exists", newUser.getEmail());
+            AppUser existingUser = appUserRepo.findUserByEmail(newUser.getEmail()).orElseThrow(() -> new IllegalStateException("User with email " + newUser
+                    .getEmail() + " does not exist"));
+            boolean enabled = existingUser.getEnabled();
+            if (enabled) {
+                throw new IllegalStateException(String.format("User with email %s already exists. Please log in instead.", newUser.getEmail()));
+            } else {
+                String newToken = UUID.randomUUID().toString();
+                ConfirmationToken newConfirmationToken = new ConfirmationToken(
+                        newToken,
+                        LocalDateTime.now(),
+                        LocalDateTime.now().plusMinutes(15),
+                        existingUser
+                );
+                confirmationTokenService.saveConfirmationToken(newConfirmationToken);
+                String confirmationLink = "http://localhost:8080/api/auth/signup/confirm?token=" + newToken;
+                emailService.send(existingUser.getEmail(), emailBuilder.buildEmail(existingUser.getFirstName(), confirmationLink));
+                throw new IllegalStateException(String.format("Account with email %s already exists, but is not enabled. Another confirmation has been sent to your email, please click the link and confirm to continue.", existingUser.getEmail()));
+            }
         }
-
-        //TODO check if user exists but hasnt confirmed email, if so send another email
 
         String encodedPassword = bCryptPasswordEncoder.encode(newUser.getPassword());
         newUser.setPassword(encodedPassword);
