@@ -1,6 +1,7 @@
 package com.mentally.mentalhealthcalendar.registration;
 
 import com.mentally.mentalhealthcalendar.model.AppUser;
+import com.mentally.mentalhealthcalendar.registration.token.ConfirmationToken;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -25,5 +26,11 @@ public class RegistrationController {
     public String confirmToken(@RequestParam("token") String token) {
         registrationService.confirmToken(token);
         return "confirmed";
+    }
+
+    @PostMapping(path="/resendConfirmation")
+    public ResponseEntity<ResponseUser> resendEmail(@RequestBody String email) {
+        ResponseUser user = registrationService.resendEmail(email);
+        return new ResponseEntity<>(user, HttpStatus.OK);
     }
 }

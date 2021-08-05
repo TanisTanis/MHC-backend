@@ -2,6 +2,7 @@ package com.mentally.mentalhealthcalendar.registration;
 
 import com.mentally.mentalhealthcalendar.email.EmailBuilder;
 import com.mentally.mentalhealthcalendar.email.EmailSender;
+import com.mentally.mentalhealthcalendar.email.EmailService;
 import com.mentally.mentalhealthcalendar.model.AppUser;
 import com.mentally.mentalhealthcalendar.model.AppUserRole;
 import com.mentally.mentalhealthcalendar.registration.token.ConfirmationToken;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Service
 @AllArgsConstructor
@@ -24,6 +26,7 @@ public class RegistrationService {
     private final EmailSender emailSender;
     private final AppUserService appUserService;
     private final EmailBuilder emailBuilder;
+    private final EmailService emailService;
 
     public ResponseUser register(RegistrationRequest newUser) {
         boolean validEmail = emailValidator.test(newUser.getEmail());
@@ -65,5 +68,21 @@ public class RegistrationService {
         authorizationService.enableAppUser(confirmationToken.getAppUser().getEmail());
         String returnLink = "<a href=\"https://localhost:4200/login\">here</a>";
         return "Your email has been confirmed! Please click " + returnLink + " and login with your credentials";
+    }
+
+    public ResponseUser resendEmail(String email) {
+        AppUser user = appUserService.findUserByEmail(email)
+                .orElseThrow(() -> new IllegalStateException("User with email " + email + " does not exist"));
+        String newToken = UUID.randomUUID().toString();
+        ConfirmationToken newConfirmationToken = new ConfirmationToken(
+                newToken,
+                LocalDateTime.now(),
+                LocalDateTime.now().plusMinutes(15),
+                user
+        );
+        confirmationTokenService.saveConfirmationToken(newConfirmationToken);
+        String confirmationLink = "http://localhost:8080/api/auth/signup/confirm?token=" + newToken;
+        emailService.send(email, emailBuilder.buildEmail(user.getFirstName(), confirmationLink));
+        return new ResponseUser(user.getId(), user.getEmail(), newToken);
     }
 }
